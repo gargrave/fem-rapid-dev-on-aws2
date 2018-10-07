@@ -1,7 +1,10 @@
 import React, { Component, PureComponent } from 'react'
 import './Application.css'
 
+import { withAuthenticator } from 'aws-amplify-react'
 import { Storage } from 'aws-amplify'
+
+Storage.configure({ level: 'private' })
 
 class S3Image extends PureComponent {
   state = { src: null }
@@ -67,4 +70,4 @@ class Application extends Component {
   }
 }
 
-export default Application
+export default withAuthenticator(Application)
