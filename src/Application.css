@@ -48,7 +48,7 @@ input[type='submit'] {
 
 button:hover,
 .button:hover,
-input[type='submit']:hover {
+input[type='submit']:hover:not(:disabled) {
   background-color: #815ef6;
 }
 

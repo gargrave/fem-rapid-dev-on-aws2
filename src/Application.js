@@ -4,6 +4,8 @@ import './Application.css'
 import { withAuthenticator } from 'aws-amplify-react'
 import { Storage } from 'aws-amplify'
 
+import ImageForm from './ImageForm'
+
 Storage.configure({ level: 'private' })
 
 class S3Image extends PureComponent {
@@ -30,36 +32,48 @@ class S3Image extends PureComponent {
 }
 
 class Application extends Component {
-  state = {
-    files: []
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      files: [],
+      hasFileReference: false,
+    }
+    this.fileInputRef = React.createRef()
   }
 
   async componentDidMount() {
-    // const keys = await Storage.list('')
-    // const files = await Promise.all(keys.map(async ({ key }) => await Storage.get(key)))
     const files = await Storage.list('')
     this.setState({ files })
   }
 
-  handleSubmit = async (event) => {
+  onFileInputChange = event => {
     event.preventDefault()
 
-    const file = this.fileInput.files[0]
+    const selectedFile = this.fileInputRef.current.files[0]
+    this.setState({ hasFileReference: !!selectedFile })
+  }
+
+  onFormSubmit = async (event) => {
+    event.preventDefault()
+
+    const file = this.fileInputRef.current.files[0]
     const { name } = file
     const newFile = await Storage.put(name, file)
     this.setState(({ files }) => ({ files: files.concat(newFile) }))
   }
 
   render() {
+    const { hasFileReference } = this.state
     return (
       <div className="Application">
-        <form className="NewItem" onSubmit={this.handleSubmit}>
-          <input
-            type="file"
-            ref={input => this.fileInput = input}
-          />
-          <input className="full-width" type="submit" />
-        </form>
+        <ImageForm 
+          canSubmit={hasFileReference}
+          onFormSubmit={this.onFormSubmit}
+          onFileInputChange={this.onFileInputChange}
+          ref={this.fileInputRef}
+        />
+
         <section className="Application-images">
           {this.state.files.map(({ key }, i) => {
             return <S3Image s3key={key} key={key} />
